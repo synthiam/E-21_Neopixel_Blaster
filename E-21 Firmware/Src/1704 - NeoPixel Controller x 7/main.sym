@@ -1,0 +1,114 @@
+004-005 @READ_PROGRAM_MEMORY8.P1
+004-005 @WRITE_PROGRAM_MEMORY8.P2
+004-005 @READ_PACKED_MEMORY.P3
+004-005 @WRITE_PACKED_MEMORY.P4
+006-007 @READ_PACKED_MEMORY.P1
+006-007 @WRITE_PACKED_MEMORY.P2
+020     @INTERRUPT_AREA
+021     @INTERRUPT_AREA
+022     @INTERRUPT_AREA
+023     @INTERRUPT_AREA
+024     rs232_errors
+025-06F,0A0-0EF,120-16F,1A0-1A4 _buffer
+070     _outputPort
+071     _bufferSize
+072     _outputPortRecv
+073     _bufferSizeRecv
+074     _inputState
+075     _inputPosition
+076.0   _startSending
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+111.6   C1OUT
+113.6   C2OUT
+191-192 @READ_PROGRAM_MEMORY8.P1
+191-192 @WRITE_PROGRAM_MEMORY8.P2
+1A5-1EF,220-26F,2A0-2EF,320-324 _bufferRecv
+291     CCP_1_LOW
+291     CCP_1
+292     CCP_1_HIGH
+298     CCP_2_LOW
+298     CCP_2
+299     CCP_2_HIGH
+325     MAIN.tr
+328-329 ChangeLED1.p
+328-329 ChangeLED6.p
+328-329 ChangeLED3.p
+328-329 ChangeLED5.p
+328-329 ChangeLED7.p
+328-329 ChangeLED2.p
+328-329 ChangeLED4.p
+328-329 ChangeLED0.p
+328     MAIN.@SCRATCH1
+329     MAIN.@SCRATCH2
+32A     ChangeLED7.dataByte
+32A     ChangeLED2.dataByte
+32A     ChangeLED0.dataByte
+32A     ChangeLED6.dataByte
+32A     ChangeLED4.dataByte
+32A     ChangeLED5.dataByte
+32A     ChangeLED3.dataByte
+32A     ChangeLED1.dataByte
+32A     MAIN.@SCRATCH3
+32C     RDA_isr.@SCRATCH1
+32D     RDA_isr.@SCRATCH2
+32E     RDA_isr.@SCRATCH3
+32F     RDA_isr.@SCRATCH4
+619.5   PWM3OUT
+61C.5   PWM4OUT
+F10.5   LC1OUT
+F1A.5   LC2OUT
+F24.5   LC3OUT
+
+ROM Allocation:
+000021  @GETCH_BIU_1
+000032  RDA_isr
+00006A  @cinit1
+00006A  MAIN
+00008E  @cinit2
+0000CF  ChangeLED0
+000166  ChangeLED1
+0001FD  ChangeLED2
+000294  ChangeLED3
+00032B  ChangeLED4
+0003C2  ChangeLED5
+000459  ChangeLED6
+0004F0  ChangeLED7
+00058B  @goto11488
+
+Project Directory:
+    C:\My Documents\SVN\Developer - Microcontroller\Microchip\1704 - NeoPixel Controller x 7\
+
+Project Files:
+    main.c                                                  [19-May-16 22:34  CRC=AC8B04F8]
+    main.h                                                  [13-May-16 14:41  CRC=E20E2A63]
+    ..\..\..\..\..\Program Files (x86)\PICC\Devices\16F1704.h [04-Mar-14 15:12  CRC=284E4DDA]
+
+Source signature=DF35CB0F
+
+Units:
+    main (main)
+
+Compiler Settings:
+    Processor:      PIC16F1704
+    Pointer Size:   16
+    ADC Range:      0-65535
+    Opt Level:      9
+    Short,Int,Long: UNSIGNED: 1,8,16
+    Float,Double:   32,32
+    Enhanced 16:    Yes
+
+Output Files:
+    XREF file:   main.xsym
+    Errors:      main.err
+    Ext Symbols: main.esym
+    INHX8:       main.hex
+    Symbols:     main.sym
+    List:        main.lst
+    Debug/COFF:  main.cof
+    Project:     main.ccspjt
+    Call Tree:   main.tre
+    Statistics:  main.STA

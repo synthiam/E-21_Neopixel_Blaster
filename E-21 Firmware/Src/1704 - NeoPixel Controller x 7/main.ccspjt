@@ -1,0 +1,24 @@
+[PROJECT]
+Target=main.hex
+Processor_Text=PIC16F1704
+CCSVerions=5.021
+Compiler=PCM
+CCSVersion=5.021
+[Target Data]
+FileList=main.c
+[Directories]
+Include=C:\Program Files (x86)\PICC\Devices\;C:\Program Files (x86)\PICC\Drivers\
+[C:\My Documents\SVN\Developer - Microcontroller\Microchip\1704 - NeoPixel Controller x 7\main]
+Type=4
+[mru-list]
+1=main.c
+[Opened Files]
+1=main.c
+2=main.h
+3=
+4=
+[main.c]
+Type=4
+[Units]
+Count=1
+1=main (main)

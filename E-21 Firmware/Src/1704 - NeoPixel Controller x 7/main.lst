@@ -1,0 +1,2600 @@
+CCS PCM C Compiler, Version 5.021, 50860               19-May-16 22:36
+
+               Filename:   C:\My Documents\SVN\Developer - Microcontroller\Microchip\1704 - NeoPixel Controller x 7\main.lst
+
+               ROM used:   1430 words (35%)
+                           Largest free fragment is 2048
+               RAM used:   500 (98%) at main() level
+                           512 (100%) worst case
+               Stack used: 2 locations (0 in main + 2 for interrupts)
+               Stack size: 16
+
+*
+0000:  MOVLP  00
+0001:  GOTO   06A
+0002:  NOP
+*
+0004:  CLRF   03
+0005:  MOVLP  00
+0006:  MOVLB  00
+0007:  MOVF   77,W
+0008:  MOVWF  20
+0009:  MOVF   78,W
+000A:  MOVWF  21
+000B:  MOVF   79,W
+000C:  MOVWF  22
+000D:  MOVF   7A,W
+000E:  MOVWF  23
+000F:  CLRF   05
+0010:  MOVLW  91
+0011:  MOVWF  04
+0012:  BTFSS  00.5
+0013:  GOTO   016
+0014:  BTFSC  11.5
+0015:  GOTO   01F
+0016:  MOVF   20,W
+0017:  MOVWF  77
+0018:  MOVF   21,W
+0019:  MOVWF  78
+001A:  MOVF   22,W
+001B:  MOVWF  79
+001C:  MOVF   23,W
+001D:  MOVWF  7A
+001E:  RETFIE
+001F:  MOVLP  00
+0020:  GOTO   032
+.................... #include <main.h> 
+.................... #include <16F1704.h> 
+.................... //////////// Standard Header file for the PIC16F1704 device //////////////// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... ////        (C) Copyright 1996, 2013 Custom Computer Services          //// 
+.................... //// This source code may only be used by licensed users of the CCS C  //// 
+.................... //// compiler.  This source code may only be distributed to other      //// 
+.................... //// licensed users of the CCS C compiler.  No other use, reproduction //// 
+.................... //// or distribution is permitted without written permission.          //// 
+.................... //// Derivative programs created using this software in object code    //// 
+.................... //// form are not restricted in any way.                               //// 
+.................... /////////////////////////////////////////////////////////////////////////// 
+.................... #device PIC16F1704 
+*
+058B:  BSF    0A.0
+058C:  BCF    0A.1
+058D:  BSF    0A.2
+058E:  ADDWF  02,F
+058F:  GOTO   0CF
+0590:  GOTO   166
+0591:  GOTO   1FD
+0592:  GOTO   294
+0593:  GOTO   32B
+0594:  GOTO   3C2
+0595:  GOTO   459
+0596:  GOTO   4F0
+....................  
+.................... #list 
+....................  
+.................... #device ADC=16 
+....................  
+.................... #FUSES NOWDT                   //No Watch Dog Timer 
+.................... #FUSES PROTECT                 //Code protected from reads 
+.................... #FUSES NOBROWNOUT              //No brownout reset 
+.................... #FUSES NOLVP                   //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+....................  
+.................... #use delay(internal=32MHz) 
+....................  
+.................... #use FAST_IO(ALL) 
+....................  
+.................... #pin_select rx1=pin_C5 
+.................... #pin_select tx1=pin_C0 
+....................  
+.................... #use rs232(baud=57600, parity=N, xmit=pin_C0, rcv=pin_C5, bits=8, stream=COMM, ERRORS) 
+*
+0021:  BTFSS  11.5
+0022:  GOTO   021
+0023:  MOVLB  03
+0024:  MOVF   1D,W
+0025:  MOVLB  00
+0026:  MOVWF  24
+0027:  MOVLB  03
+0028:  MOVF   19,W
+0029:  MOVWF  78
+002A:  MOVLB  00
+002B:  BTFSS  24.1
+002C:  GOTO   030
+002D:  MOVLB  03
+002E:  BCF    1D.4
+002F:  BSF    1D.4
+0030:  MOVLB  00
+0031:  RETURN
+....................  
+.................... #define DELAY_HIGH_0 2 
+.................... #define DELAY_LOW_0 2 
+....................  
+.................... #define DELAY_HIGH_1 6 
+.................... #define DELAY_LOW_1 1 
+....................  
+....................  
+....................  
+.................... volatile char _buffer[240];     // This buffer is used to transmit to the neo pixels. support for 74 neopixels per channel 
+.................... volatile char _outputPort; 
+.................... volatile char _bufferSize; 
+....................  
+.................... volatile char _bufferRecv[240]; // This buffer is used in the receive from the COMM. support for 74 neopixels per channel 
+.................... volatile char _outputPortRecv; 
+.................... volatile char _bufferSizeRecv; 
+....................  
+.................... volatile char _inputState; // 0 = get port, 1 = number of leds, 2 = data 
+.................... volatile char _inputPosition; 
+.................... volatile int1 _startSending; 
+....................  
+.................... #INT_RDA 
+.................... void  RDA_isr(void) { 
+....................    
+....................   switch (_inputState) { 
+0032:  MOVF   74,W
+0033:  XORLW  00
+0034:  BTFSC  03.2
+0035:  GOTO   03D
+0036:  XORLW  01
+0037:  BTFSC  03.2
+0038:  GOTO   043
+0039:  XORLW  03
+003A:  BTFSC  03.2
+003B:  GOTO   04C
+003C:  GOTO   067
+....................    
+....................     case 0: 
+....................      
+....................       // get the port 
+....................       _outputPortRecv = getc(COMM); 
+003D:  CALL   021
+003E:  MOVF   78,W
+003F:  MOVWF  72
+....................             
+....................       // next read byte is the number of leds 
+....................       _inputState = 1; 
+0040:  MOVLW  01
+0041:  MOVWF  74
+....................        
+....................       break; 
+0042:  GOTO   067
+....................  
+....................     case 1: 
+....................      
+....................       // get the number of leds 
+....................       _bufferSizeRecv = getc(COMM); 
+0043:  CALL   021
+0044:  MOVF   78,W
+0045:  MOVWF  73
+....................              
+....................       // multiply the number of leds by 3 to get the buffer size (for each color of red green blue) 
+....................       _bufferSizeRecv += _bufferSizeRecv + _bufferSizeRecv; 
+0046:  MOVF   73,W
+0047:  ADDWF  73,W
+0048:  ADDWF  73,F
+....................                
+....................       // all next bytes are the data 
+....................       _inputState = 2; 
+0049:  MOVLW  02
+004A:  MOVWF  74
+....................        
+....................       break; 
+004B:  GOTO   067
+....................        
+....................     case 2: 
+....................  
+....................       _bufferRecv[_inputPosition] = getc(COMM); 
+004C:  MOVLW  F5
+004D:  ADDWF  75,W
+004E:  MOVWF  04
+004F:  MOVLW  20
+0050:  MOVWF  05
+0051:  BTFSC  03.0
+0052:  INCF   05,F
+0053:  MOVF   05,W
+0054:  MOVLB  06
+0055:  MOVWF  2F
+0056:  MOVF   04,W
+0057:  MOVWF  2E
+0058:  MOVLB  00
+0059:  CALL   021
+005A:  MOVLB  06
+005B:  MOVF   2F,W
+005C:  MOVWF  05
+005D:  MOVF   2E,W
+005E:  MOVWF  04
+005F:  MOVF   78,W
+0060:  MOVWF  00
+....................        
+....................       _inputPosition++; 
+0061:  INCF   75,F
+....................        
+....................       if (_inputPosition == _bufferSizeRecv)         
+0062:  MOVF   73,W
+0063:  SUBWF  75,W
+0064:  BTFSC  03.2
+....................         _startSending = true; // tell the main loop to start sending 
+0065:  BSF    76.0
+....................        
+....................       break; 
+0066:  MOVLB  00
+....................   }   
+.................... } 
+....................  
+0067:  BCF    11.5
+0068:  MOVLP  00
+0069:  GOTO   016
+.................... #inline 
+.................... void ChangeLED0() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+00CF:  MOVLB  06
+00D0:  CLRF   29
+00D1:  CLRF   28
+00D2:  MOVF   29,F
+00D3:  BTFSS  03.2
+00D4:  GOTO   165
+00D5:  MOVF   71,W
+00D6:  SUBWF  28,W
+00D7:  BTFSC  03.0
+00D8:  GOTO   165
+....................    
+....................     char dataByte = _buffer[p]; 
+00D9:  MOVLW  05
+00DA:  ADDWF  28,W
+00DB:  MOVWF  04
+00DC:  MOVLW  20
+00DD:  ADDWFC 29,W
+00DE:  MOVWF  05
+00DF:  MOVF   00,W
+00E0:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+00E1:  BTFSS  2A.7
+00E2:  GOTO   0EB
+....................      
+....................       output_high(pin_a5); 
+00E3:  MOVLB  02
+00E4:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+00E5:  GOTO   0E6
+00E6:  GOTO   0E7
+00E7:  GOTO   0E8
+....................       output_low(pin_a5); 
+00E8:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+00E9:  GOTO   0F0
+00EA:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+00EB:  MOVLB  02
+00EC:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+00ED:  GOTO   0EE
+....................       output_low(pin_a5); 
+00EE:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+00EF:  GOTO   0F0
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+00F0:  MOVLB  06
+00F1:  BTFSS  2A.6
+00F2:  GOTO   0FB
+....................      
+....................       output_high(pin_a5); 
+00F3:  MOVLB  02
+00F4:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+00F5:  GOTO   0F6
+00F6:  GOTO   0F7
+00F7:  GOTO   0F8
+....................       output_low(pin_a5); 
+00F8:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+00F9:  GOTO   100
+00FA:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+00FB:  MOVLB  02
+00FC:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+00FD:  GOTO   0FE
+....................       output_low(pin_a5); 
+00FE:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+00FF:  GOTO   100
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+0100:  MOVLB  06
+0101:  BTFSS  2A.5
+0102:  GOTO   10B
+....................      
+....................       output_high(pin_a5); 
+0103:  MOVLB  02
+0104:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0105:  GOTO   106
+0106:  GOTO   107
+0107:  GOTO   108
+....................       output_low(pin_a5); 
+0108:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0109:  GOTO   110
+010A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+010B:  MOVLB  02
+010C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+010D:  GOTO   10E
+....................       output_low(pin_a5); 
+010E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+010F:  GOTO   110
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+0110:  MOVLB  06
+0111:  BTFSS  2A.4
+0112:  GOTO   11B
+....................      
+....................       output_high(pin_a5); 
+0113:  MOVLB  02
+0114:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0115:  GOTO   116
+0116:  GOTO   117
+0117:  GOTO   118
+....................       output_low(pin_a5); 
+0118:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0119:  GOTO   120
+011A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+011B:  MOVLB  02
+011C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+011D:  GOTO   11E
+....................       output_low(pin_a5); 
+011E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+011F:  GOTO   120
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+0120:  MOVLB  06
+0121:  BTFSS  2A.3
+0122:  GOTO   12B
+....................      
+....................       output_high(pin_a5); 
+0123:  MOVLB  02
+0124:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0125:  GOTO   126
+0126:  GOTO   127
+0127:  GOTO   128
+....................       output_low(pin_a5); 
+0128:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0129:  GOTO   130
+012A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+012B:  MOVLB  02
+012C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+012D:  GOTO   12E
+....................       output_low(pin_a5); 
+012E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+012F:  GOTO   130
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+0130:  MOVLB  06
+0131:  BTFSS  2A.2
+0132:  GOTO   13B
+....................      
+....................       output_high(pin_a5); 
+0133:  MOVLB  02
+0134:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0135:  GOTO   136
+0136:  GOTO   137
+0137:  GOTO   138
+....................       output_low(pin_a5); 
+0138:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0139:  GOTO   140
+013A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+013B:  MOVLB  02
+013C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+013D:  GOTO   13E
+....................       output_low(pin_a5); 
+013E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+013F:  GOTO   140
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+0140:  MOVLB  06
+0141:  BTFSS  2A.1
+0142:  GOTO   14B
+....................      
+....................       output_high(pin_a5); 
+0143:  MOVLB  02
+0144:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0145:  GOTO   146
+0146:  GOTO   147
+0147:  GOTO   148
+....................       output_low(pin_a5); 
+0148:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0149:  GOTO   150
+014A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+014B:  MOVLB  02
+014C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+014D:  GOTO   14E
+....................       output_low(pin_a5); 
+014E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+014F:  GOTO   150
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+0150:  MOVLB  06
+0151:  BTFSS  2A.0
+0152:  GOTO   15B
+....................      
+....................       output_high(pin_a5); 
+0153:  MOVLB  02
+0154:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_1); 
+0155:  GOTO   156
+0156:  GOTO   157
+0157:  GOTO   158
+....................       output_low(pin_a5); 
+0158:  BCF    0C.5
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0159:  GOTO   160
+015A:  MOVLB  06
+....................      
+....................       output_high(pin_a5); 
+015B:  MOVLB  02
+015C:  BSF    0C.5
+....................       delay_cycles(DELAY_HIGH_0); 
+015D:  GOTO   15E
+....................       output_low(pin_a5); 
+015E:  BCF    0C.5
+....................       delay_cycles(DELAY_LOW_0); 
+015F:  GOTO   160
+....................     }              
+0160:  MOVLB  06
+0161:  INCF   28,F
+0162:  BTFSC  03.2
+0163:  INCF   29,F
+0164:  GOTO   0D2
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED1() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+0166:  MOVLB  06
+0167:  CLRF   29
+0168:  CLRF   28
+0169:  MOVF   29,F
+016A:  BTFSS  03.2
+016B:  GOTO   1FC
+016C:  MOVF   71,W
+016D:  SUBWF  28,W
+016E:  BTFSC  03.0
+016F:  GOTO   1FC
+....................    
+....................     char dataByte = _buffer[p]; 
+0170:  MOVLW  05
+0171:  ADDWF  28,W
+0172:  MOVWF  04
+0173:  MOVLW  20
+0174:  ADDWFC 29,W
+0175:  MOVWF  05
+0176:  MOVF   00,W
+0177:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+0178:  BTFSS  2A.7
+0179:  GOTO   182
+....................      
+....................       output_high(pin_a4); 
+017A:  MOVLB  02
+017B:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+017C:  GOTO   17D
+017D:  GOTO   17E
+017E:  GOTO   17F
+....................       output_low(pin_a4); 
+017F:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0180:  GOTO   187
+0181:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+0182:  MOVLB  02
+0183:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+0184:  GOTO   185
+....................       output_low(pin_a4); 
+0185:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+0186:  GOTO   187
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+0187:  MOVLB  06
+0188:  BTFSS  2A.6
+0189:  GOTO   192
+....................      
+....................       output_high(pin_a4); 
+018A:  MOVLB  02
+018B:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+018C:  GOTO   18D
+018D:  GOTO   18E
+018E:  GOTO   18F
+....................       output_low(pin_a4); 
+018F:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0190:  GOTO   197
+0191:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+0192:  MOVLB  02
+0193:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+0194:  GOTO   195
+....................       output_low(pin_a4); 
+0195:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+0196:  GOTO   197
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+0197:  MOVLB  06
+0198:  BTFSS  2A.5
+0199:  GOTO   1A2
+....................      
+....................       output_high(pin_a4); 
+019A:  MOVLB  02
+019B:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+019C:  GOTO   19D
+019D:  GOTO   19E
+019E:  GOTO   19F
+....................       output_low(pin_a4); 
+019F:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01A0:  GOTO   1A7
+01A1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01A2:  MOVLB  02
+01A3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01A4:  GOTO   1A5
+....................       output_low(pin_a4); 
+01A5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01A6:  GOTO   1A7
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+01A7:  MOVLB  06
+01A8:  BTFSS  2A.4
+01A9:  GOTO   1B2
+....................      
+....................       output_high(pin_a4); 
+01AA:  MOVLB  02
+01AB:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+01AC:  GOTO   1AD
+01AD:  GOTO   1AE
+01AE:  GOTO   1AF
+....................       output_low(pin_a4); 
+01AF:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01B0:  GOTO   1B7
+01B1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01B2:  MOVLB  02
+01B3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01B4:  GOTO   1B5
+....................       output_low(pin_a4); 
+01B5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01B6:  GOTO   1B7
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+01B7:  MOVLB  06
+01B8:  BTFSS  2A.3
+01B9:  GOTO   1C2
+....................      
+....................       output_high(pin_a4); 
+01BA:  MOVLB  02
+01BB:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+01BC:  GOTO   1BD
+01BD:  GOTO   1BE
+01BE:  GOTO   1BF
+....................       output_low(pin_a4); 
+01BF:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01C0:  GOTO   1C7
+01C1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01C2:  MOVLB  02
+01C3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01C4:  GOTO   1C5
+....................       output_low(pin_a4); 
+01C5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01C6:  GOTO   1C7
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+01C7:  MOVLB  06
+01C8:  BTFSS  2A.2
+01C9:  GOTO   1D2
+....................      
+....................       output_high(pin_a4); 
+01CA:  MOVLB  02
+01CB:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+01CC:  GOTO   1CD
+01CD:  GOTO   1CE
+01CE:  GOTO   1CF
+....................       output_low(pin_a4); 
+01CF:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01D0:  GOTO   1D7
+01D1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01D2:  MOVLB  02
+01D3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01D4:  GOTO   1D5
+....................       output_low(pin_a4); 
+01D5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01D6:  GOTO   1D7
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+01D7:  MOVLB  06
+01D8:  BTFSS  2A.1
+01D9:  GOTO   1E2
+....................      
+....................       output_high(pin_a4); 
+01DA:  MOVLB  02
+01DB:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+01DC:  GOTO   1DD
+01DD:  GOTO   1DE
+01DE:  GOTO   1DF
+....................       output_low(pin_a4); 
+01DF:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01E0:  GOTO   1E7
+01E1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01E2:  MOVLB  02
+01E3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01E4:  GOTO   1E5
+....................       output_low(pin_a4); 
+01E5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01E6:  GOTO   1E7
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+01E7:  MOVLB  06
+01E8:  BTFSS  2A.0
+01E9:  GOTO   1F2
+....................      
+....................       output_high(pin_a4); 
+01EA:  MOVLB  02
+01EB:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_1); 
+01EC:  GOTO   1ED
+01ED:  GOTO   1EE
+01EE:  GOTO   1EF
+....................       output_low(pin_a4); 
+01EF:  BCF    0C.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+01F0:  GOTO   1F7
+01F1:  MOVLB  06
+....................      
+....................       output_high(pin_a4); 
+01F2:  MOVLB  02
+01F3:  BSF    0C.4
+....................       delay_cycles(DELAY_HIGH_0); 
+01F4:  GOTO   1F5
+....................       output_low(pin_a4); 
+01F5:  BCF    0C.4
+....................       delay_cycles(DELAY_LOW_0); 
+01F6:  GOTO   1F7
+....................     }              
+01F7:  MOVLB  06
+01F8:  INCF   28,F
+01F9:  BTFSC  03.2
+01FA:  INCF   29,F
+01FB:  GOTO   169
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED2() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+01FD:  MOVLB  06
+01FE:  CLRF   29
+01FF:  CLRF   28
+0200:  MOVF   29,F
+0201:  BTFSS  03.2
+0202:  GOTO   293
+0203:  MOVF   71,W
+0204:  SUBWF  28,W
+0205:  BTFSC  03.0
+0206:  GOTO   293
+....................    
+....................     char dataByte = _buffer[p]; 
+0207:  MOVLW  05
+0208:  ADDWF  28,W
+0209:  MOVWF  04
+020A:  MOVLW  20
+020B:  ADDWFC 29,W
+020C:  MOVWF  05
+020D:  MOVF   00,W
+020E:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+020F:  BTFSS  2A.7
+0210:  GOTO   219
+....................      
+....................       output_high(pin_c4); 
+0211:  MOVLB  02
+0212:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0213:  GOTO   214
+0214:  GOTO   215
+0215:  GOTO   216
+....................       output_low(pin_c4); 
+0216:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0217:  GOTO   21E
+0218:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0219:  MOVLB  02
+021A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+021B:  GOTO   21C
+....................       output_low(pin_c4); 
+021C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+021D:  GOTO   21E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+021E:  MOVLB  06
+021F:  BTFSS  2A.6
+0220:  GOTO   229
+....................      
+....................       output_high(pin_c4); 
+0221:  MOVLB  02
+0222:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0223:  GOTO   224
+0224:  GOTO   225
+0225:  GOTO   226
+....................       output_low(pin_c4); 
+0226:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0227:  GOTO   22E
+0228:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0229:  MOVLB  02
+022A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+022B:  GOTO   22C
+....................       output_low(pin_c4); 
+022C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+022D:  GOTO   22E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+022E:  MOVLB  06
+022F:  BTFSS  2A.5
+0230:  GOTO   239
+....................      
+....................       output_high(pin_c4); 
+0231:  MOVLB  02
+0232:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0233:  GOTO   234
+0234:  GOTO   235
+0235:  GOTO   236
+....................       output_low(pin_c4); 
+0236:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0237:  GOTO   23E
+0238:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0239:  MOVLB  02
+023A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+023B:  GOTO   23C
+....................       output_low(pin_c4); 
+023C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+023D:  GOTO   23E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+023E:  MOVLB  06
+023F:  BTFSS  2A.4
+0240:  GOTO   249
+....................      
+....................       output_high(pin_c4); 
+0241:  MOVLB  02
+0242:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0243:  GOTO   244
+0244:  GOTO   245
+0245:  GOTO   246
+....................       output_low(pin_c4); 
+0246:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0247:  GOTO   24E
+0248:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0249:  MOVLB  02
+024A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+024B:  GOTO   24C
+....................       output_low(pin_c4); 
+024C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+024D:  GOTO   24E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+024E:  MOVLB  06
+024F:  BTFSS  2A.3
+0250:  GOTO   259
+....................      
+....................       output_high(pin_c4); 
+0251:  MOVLB  02
+0252:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0253:  GOTO   254
+0254:  GOTO   255
+0255:  GOTO   256
+....................       output_low(pin_c4); 
+0256:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0257:  GOTO   25E
+0258:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0259:  MOVLB  02
+025A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+025B:  GOTO   25C
+....................       output_low(pin_c4); 
+025C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+025D:  GOTO   25E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+025E:  MOVLB  06
+025F:  BTFSS  2A.2
+0260:  GOTO   269
+....................      
+....................       output_high(pin_c4); 
+0261:  MOVLB  02
+0262:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0263:  GOTO   264
+0264:  GOTO   265
+0265:  GOTO   266
+....................       output_low(pin_c4); 
+0266:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0267:  GOTO   26E
+0268:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0269:  MOVLB  02
+026A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+026B:  GOTO   26C
+....................       output_low(pin_c4); 
+026C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+026D:  GOTO   26E
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+026E:  MOVLB  06
+026F:  BTFSS  2A.1
+0270:  GOTO   279
+....................      
+....................       output_high(pin_c4); 
+0271:  MOVLB  02
+0272:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0273:  GOTO   274
+0274:  GOTO   275
+0275:  GOTO   276
+....................       output_low(pin_c4); 
+0276:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0277:  GOTO   27E
+0278:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0279:  MOVLB  02
+027A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+027B:  GOTO   27C
+....................       output_low(pin_c4); 
+027C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+027D:  GOTO   27E
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+027E:  MOVLB  06
+027F:  BTFSS  2A.0
+0280:  GOTO   289
+....................      
+....................       output_high(pin_c4); 
+0281:  MOVLB  02
+0282:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_1); 
+0283:  GOTO   284
+0284:  GOTO   285
+0285:  GOTO   286
+....................       output_low(pin_c4); 
+0286:  BCF    0E.4
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0287:  GOTO   28E
+0288:  MOVLB  06
+....................      
+....................       output_high(pin_c4); 
+0289:  MOVLB  02
+028A:  BSF    0E.4
+....................       delay_cycles(DELAY_HIGH_0); 
+028B:  GOTO   28C
+....................       output_low(pin_c4); 
+028C:  BCF    0E.4
+....................       delay_cycles(DELAY_LOW_0); 
+028D:  GOTO   28E
+....................     }              
+028E:  MOVLB  06
+028F:  INCF   28,F
+0290:  BTFSC  03.2
+0291:  INCF   29,F
+0292:  GOTO   200
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED3() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+0294:  MOVLB  06
+0295:  CLRF   29
+0296:  CLRF   28
+0297:  MOVF   29,F
+0298:  BTFSS  03.2
+0299:  GOTO   32A
+029A:  MOVF   71,W
+029B:  SUBWF  28,W
+029C:  BTFSC  03.0
+029D:  GOTO   32A
+....................    
+....................     char dataByte = _buffer[p]; 
+029E:  MOVLW  05
+029F:  ADDWF  28,W
+02A0:  MOVWF  04
+02A1:  MOVLW  20
+02A2:  ADDWFC 29,W
+02A3:  MOVWF  05
+02A4:  MOVF   00,W
+02A5:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+02A6:  BTFSS  2A.7
+02A7:  GOTO   2B0
+....................      
+....................       output_high(pin_c3); 
+02A8:  MOVLB  02
+02A9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02AA:  GOTO   2AB
+02AB:  GOTO   2AC
+02AC:  GOTO   2AD
+....................       output_low(pin_c3); 
+02AD:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02AE:  GOTO   2B5
+02AF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+02B0:  MOVLB  02
+02B1:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+02B2:  GOTO   2B3
+....................       output_low(pin_c3); 
+02B3:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+02B4:  GOTO   2B5
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+02B5:  MOVLB  06
+02B6:  BTFSS  2A.6
+02B7:  GOTO   2C0
+....................      
+....................       output_high(pin_c3); 
+02B8:  MOVLB  02
+02B9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02BA:  GOTO   2BB
+02BB:  GOTO   2BC
+02BC:  GOTO   2BD
+....................       output_low(pin_c3); 
+02BD:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02BE:  GOTO   2C5
+02BF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+02C0:  MOVLB  02
+02C1:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+02C2:  GOTO   2C3
+....................       output_low(pin_c3); 
+02C3:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+02C4:  GOTO   2C5
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+02C5:  MOVLB  06
+02C6:  BTFSS  2A.5
+02C7:  GOTO   2D0
+....................      
+....................       output_high(pin_c3); 
+02C8:  MOVLB  02
+02C9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02CA:  GOTO   2CB
+02CB:  GOTO   2CC
+02CC:  GOTO   2CD
+....................       output_low(pin_c3); 
+02CD:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02CE:  GOTO   2D5
+02CF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+02D0:  MOVLB  02
+02D1:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+02D2:  GOTO   2D3
+....................       output_low(pin_c3); 
+02D3:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+02D4:  GOTO   2D5
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+02D5:  MOVLB  06
+02D6:  BTFSS  2A.4
+02D7:  GOTO   2E0
+....................      
+....................       output_high(pin_c3); 
+02D8:  MOVLB  02
+02D9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02DA:  GOTO   2DB
+02DB:  GOTO   2DC
+02DC:  GOTO   2DD
+....................       output_low(pin_c3); 
+02DD:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02DE:  GOTO   2E5
+02DF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+02E0:  MOVLB  02
+02E1:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+02E2:  GOTO   2E3
+....................       output_low(pin_c3); 
+02E3:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+02E4:  GOTO   2E5
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+02E5:  MOVLB  06
+02E6:  BTFSS  2A.3
+02E7:  GOTO   2F0
+....................      
+....................       output_high(pin_c3); 
+02E8:  MOVLB  02
+02E9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02EA:  GOTO   2EB
+02EB:  GOTO   2EC
+02EC:  GOTO   2ED
+....................       output_low(pin_c3); 
+02ED:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02EE:  GOTO   2F5
+02EF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+02F0:  MOVLB  02
+02F1:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+02F2:  GOTO   2F3
+....................       output_low(pin_c3); 
+02F3:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+02F4:  GOTO   2F5
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+02F5:  MOVLB  06
+02F6:  BTFSS  2A.2
+02F7:  GOTO   300
+....................      
+....................       output_high(pin_c3); 
+02F8:  MOVLB  02
+02F9:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+02FA:  GOTO   2FB
+02FB:  GOTO   2FC
+02FC:  GOTO   2FD
+....................       output_low(pin_c3); 
+02FD:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+02FE:  GOTO   305
+02FF:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+0300:  MOVLB  02
+0301:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+0302:  GOTO   303
+....................       output_low(pin_c3); 
+0303:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+0304:  GOTO   305
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+0305:  MOVLB  06
+0306:  BTFSS  2A.1
+0307:  GOTO   310
+....................      
+....................       output_high(pin_c3); 
+0308:  MOVLB  02
+0309:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+030A:  GOTO   30B
+030B:  GOTO   30C
+030C:  GOTO   30D
+....................       output_low(pin_c3); 
+030D:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+030E:  GOTO   315
+030F:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+0310:  MOVLB  02
+0311:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+0312:  GOTO   313
+....................       output_low(pin_c3); 
+0313:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+0314:  GOTO   315
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+0315:  MOVLB  06
+0316:  BTFSS  2A.0
+0317:  GOTO   320
+....................      
+....................       output_high(pin_c3); 
+0318:  MOVLB  02
+0319:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_1); 
+031A:  GOTO   31B
+031B:  GOTO   31C
+031C:  GOTO   31D
+....................       output_low(pin_c3); 
+031D:  BCF    0E.3
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+031E:  GOTO   325
+031F:  MOVLB  06
+....................      
+....................       output_high(pin_c3); 
+0320:  MOVLB  02
+0321:  BSF    0E.3
+....................       delay_cycles(DELAY_HIGH_0); 
+0322:  GOTO   323
+....................       output_low(pin_c3); 
+0323:  BCF    0E.3
+....................       delay_cycles(DELAY_LOW_0); 
+0324:  GOTO   325
+....................     }              
+0325:  MOVLB  06
+0326:  INCF   28,F
+0327:  BTFSC  03.2
+0328:  INCF   29,F
+0329:  GOTO   297
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED4() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+032B:  MOVLB  06
+032C:  CLRF   29
+032D:  CLRF   28
+032E:  MOVF   29,F
+032F:  BTFSS  03.2
+0330:  GOTO   3C1
+0331:  MOVF   71,W
+0332:  SUBWF  28,W
+0333:  BTFSC  03.0
+0334:  GOTO   3C1
+....................    
+....................     char dataByte = _buffer[p]; 
+0335:  MOVLW  05
+0336:  ADDWF  28,W
+0337:  MOVWF  04
+0338:  MOVLW  20
+0339:  ADDWFC 29,W
+033A:  MOVWF  05
+033B:  MOVF   00,W
+033C:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+033D:  BTFSS  2A.7
+033E:  GOTO   347
+....................      
+....................       output_high(pin_a2); 
+033F:  MOVLB  02
+0340:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0341:  GOTO   342
+0342:  GOTO   343
+0343:  GOTO   344
+....................       output_low(pin_a2); 
+0344:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0345:  GOTO   34C
+0346:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0347:  MOVLB  02
+0348:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0349:  GOTO   34A
+....................       output_low(pin_a2); 
+034A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+034B:  GOTO   34C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+034C:  MOVLB  06
+034D:  BTFSS  2A.6
+034E:  GOTO   357
+....................      
+....................       output_high(pin_a2); 
+034F:  MOVLB  02
+0350:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0351:  GOTO   352
+0352:  GOTO   353
+0353:  GOTO   354
+....................       output_low(pin_a2); 
+0354:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0355:  GOTO   35C
+0356:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0357:  MOVLB  02
+0358:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0359:  GOTO   35A
+....................       output_low(pin_a2); 
+035A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+035B:  GOTO   35C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+035C:  MOVLB  06
+035D:  BTFSS  2A.5
+035E:  GOTO   367
+....................      
+....................       output_high(pin_a2); 
+035F:  MOVLB  02
+0360:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0361:  GOTO   362
+0362:  GOTO   363
+0363:  GOTO   364
+....................       output_low(pin_a2); 
+0364:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0365:  GOTO   36C
+0366:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0367:  MOVLB  02
+0368:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0369:  GOTO   36A
+....................       output_low(pin_a2); 
+036A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+036B:  GOTO   36C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+036C:  MOVLB  06
+036D:  BTFSS  2A.4
+036E:  GOTO   377
+....................      
+....................       output_high(pin_a2); 
+036F:  MOVLB  02
+0370:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0371:  GOTO   372
+0372:  GOTO   373
+0373:  GOTO   374
+....................       output_low(pin_a2); 
+0374:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0375:  GOTO   37C
+0376:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0377:  MOVLB  02
+0378:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0379:  GOTO   37A
+....................       output_low(pin_a2); 
+037A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+037B:  GOTO   37C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+037C:  MOVLB  06
+037D:  BTFSS  2A.3
+037E:  GOTO   387
+....................      
+....................       output_high(pin_a2); 
+037F:  MOVLB  02
+0380:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0381:  GOTO   382
+0382:  GOTO   383
+0383:  GOTO   384
+....................       output_low(pin_a2); 
+0384:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0385:  GOTO   38C
+0386:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0387:  MOVLB  02
+0388:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0389:  GOTO   38A
+....................       output_low(pin_a2); 
+038A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+038B:  GOTO   38C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+038C:  MOVLB  06
+038D:  BTFSS  2A.2
+038E:  GOTO   397
+....................      
+....................       output_high(pin_a2); 
+038F:  MOVLB  02
+0390:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0391:  GOTO   392
+0392:  GOTO   393
+0393:  GOTO   394
+....................       output_low(pin_a2); 
+0394:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0395:  GOTO   39C
+0396:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+0397:  MOVLB  02
+0398:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+0399:  GOTO   39A
+....................       output_low(pin_a2); 
+039A:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+039B:  GOTO   39C
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+039C:  MOVLB  06
+039D:  BTFSS  2A.1
+039E:  GOTO   3A7
+....................      
+....................       output_high(pin_a2); 
+039F:  MOVLB  02
+03A0:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+03A1:  GOTO   3A2
+03A2:  GOTO   3A3
+03A3:  GOTO   3A4
+....................       output_low(pin_a2); 
+03A4:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+03A5:  GOTO   3AC
+03A6:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+03A7:  MOVLB  02
+03A8:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+03A9:  GOTO   3AA
+....................       output_low(pin_a2); 
+03AA:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+03AB:  GOTO   3AC
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+03AC:  MOVLB  06
+03AD:  BTFSS  2A.0
+03AE:  GOTO   3B7
+....................      
+....................       output_high(pin_a2); 
+03AF:  MOVLB  02
+03B0:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_1); 
+03B1:  GOTO   3B2
+03B2:  GOTO   3B3
+03B3:  GOTO   3B4
+....................       output_low(pin_a2); 
+03B4:  BCF    0C.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+03B5:  GOTO   3BC
+03B6:  MOVLB  06
+....................      
+....................       output_high(pin_a2); 
+03B7:  MOVLB  02
+03B8:  BSF    0C.2
+....................       delay_cycles(DELAY_HIGH_0); 
+03B9:  GOTO   3BA
+....................       output_low(pin_a2); 
+03BA:  BCF    0C.2
+....................       delay_cycles(DELAY_LOW_0); 
+03BB:  GOTO   3BC
+....................     }              
+03BC:  MOVLB  06
+03BD:  INCF   28,F
+03BE:  BTFSC  03.2
+03BF:  INCF   29,F
+03C0:  GOTO   32E
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED5() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+03C2:  MOVLB  06
+03C3:  CLRF   29
+03C4:  CLRF   28
+03C5:  MOVF   29,F
+03C6:  BTFSS  03.2
+03C7:  GOTO   458
+03C8:  MOVF   71,W
+03C9:  SUBWF  28,W
+03CA:  BTFSC  03.0
+03CB:  GOTO   458
+....................    
+....................     char dataByte = _buffer[p]; 
+03CC:  MOVLW  05
+03CD:  ADDWF  28,W
+03CE:  MOVWF  04
+03CF:  MOVLW  20
+03D0:  ADDWFC 29,W
+03D1:  MOVWF  05
+03D2:  MOVF   00,W
+03D3:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+03D4:  BTFSS  2A.7
+03D5:  GOTO   3DE
+....................      
+....................       output_high(pin_c0); 
+03D6:  MOVLB  02
+03D7:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+03D8:  GOTO   3D9
+03D9:  GOTO   3DA
+03DA:  GOTO   3DB
+....................       output_low(pin_c0); 
+03DB:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+03DC:  GOTO   3E3
+03DD:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+03DE:  MOVLB  02
+03DF:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+03E0:  GOTO   3E1
+....................       output_low(pin_c0); 
+03E1:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+03E2:  GOTO   3E3
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+03E3:  MOVLB  06
+03E4:  BTFSS  2A.6
+03E5:  GOTO   3EE
+....................      
+....................       output_high(pin_c0); 
+03E6:  MOVLB  02
+03E7:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+03E8:  GOTO   3E9
+03E9:  GOTO   3EA
+03EA:  GOTO   3EB
+....................       output_low(pin_c0); 
+03EB:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+03EC:  GOTO   3F3
+03ED:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+03EE:  MOVLB  02
+03EF:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+03F0:  GOTO   3F1
+....................       output_low(pin_c0); 
+03F1:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+03F2:  GOTO   3F3
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+03F3:  MOVLB  06
+03F4:  BTFSS  2A.5
+03F5:  GOTO   3FE
+....................      
+....................       output_high(pin_c0); 
+03F6:  MOVLB  02
+03F7:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+03F8:  GOTO   3F9
+03F9:  GOTO   3FA
+03FA:  GOTO   3FB
+....................       output_low(pin_c0); 
+03FB:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+03FC:  GOTO   403
+03FD:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+03FE:  MOVLB  02
+03FF:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0400:  GOTO   401
+....................       output_low(pin_c0); 
+0401:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0402:  GOTO   403
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+0403:  MOVLB  06
+0404:  BTFSS  2A.4
+0405:  GOTO   40E
+....................      
+....................       output_high(pin_c0); 
+0406:  MOVLB  02
+0407:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+0408:  GOTO   409
+0409:  GOTO   40A
+040A:  GOTO   40B
+....................       output_low(pin_c0); 
+040B:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+040C:  GOTO   413
+040D:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+040E:  MOVLB  02
+040F:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0410:  GOTO   411
+....................       output_low(pin_c0); 
+0411:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0412:  GOTO   413
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+0413:  MOVLB  06
+0414:  BTFSS  2A.3
+0415:  GOTO   41E
+....................      
+....................       output_high(pin_c0); 
+0416:  MOVLB  02
+0417:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+0418:  GOTO   419
+0419:  GOTO   41A
+041A:  GOTO   41B
+....................       output_low(pin_c0); 
+041B:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+041C:  GOTO   423
+041D:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+041E:  MOVLB  02
+041F:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0420:  GOTO   421
+....................       output_low(pin_c0); 
+0421:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0422:  GOTO   423
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+0423:  MOVLB  06
+0424:  BTFSS  2A.2
+0425:  GOTO   42E
+....................      
+....................       output_high(pin_c0); 
+0426:  MOVLB  02
+0427:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+0428:  GOTO   429
+0429:  GOTO   42A
+042A:  GOTO   42B
+....................       output_low(pin_c0); 
+042B:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+042C:  GOTO   433
+042D:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+042E:  MOVLB  02
+042F:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0430:  GOTO   431
+....................       output_low(pin_c0); 
+0431:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0432:  GOTO   433
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+0433:  MOVLB  06
+0434:  BTFSS  2A.1
+0435:  GOTO   43E
+....................      
+....................       output_high(pin_c0); 
+0436:  MOVLB  02
+0437:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+0438:  GOTO   439
+0439:  GOTO   43A
+043A:  GOTO   43B
+....................       output_low(pin_c0); 
+043B:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+043C:  GOTO   443
+043D:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+043E:  MOVLB  02
+043F:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0440:  GOTO   441
+....................       output_low(pin_c0); 
+0441:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0442:  GOTO   443
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+0443:  MOVLB  06
+0444:  BTFSS  2A.0
+0445:  GOTO   44E
+....................      
+....................       output_high(pin_c0); 
+0446:  MOVLB  02
+0447:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_1); 
+0448:  GOTO   449
+0449:  GOTO   44A
+044A:  GOTO   44B
+....................       output_low(pin_c0); 
+044B:  BCF    0E.0
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+044C:  GOTO   453
+044D:  MOVLB  06
+....................      
+....................       output_high(pin_c0); 
+044E:  MOVLB  02
+044F:  BSF    0E.0
+....................       delay_cycles(DELAY_HIGH_0); 
+0450:  GOTO   451
+....................       output_low(pin_c0); 
+0451:  BCF    0E.0
+....................       delay_cycles(DELAY_LOW_0); 
+0452:  GOTO   453
+....................     }              
+0453:  MOVLB  06
+0454:  INCF   28,F
+0455:  BTFSC  03.2
+0456:  INCF   29,F
+0457:  GOTO   3C5
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED6() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+0459:  MOVLB  06
+045A:  CLRF   29
+045B:  CLRF   28
+045C:  MOVF   29,F
+045D:  BTFSS  03.2
+045E:  GOTO   4EF
+045F:  MOVF   71,W
+0460:  SUBWF  28,W
+0461:  BTFSC  03.0
+0462:  GOTO   4EF
+....................    
+....................     char dataByte = _buffer[p]; 
+0463:  MOVLW  05
+0464:  ADDWF  28,W
+0465:  MOVWF  04
+0466:  MOVLW  20
+0467:  ADDWFC 29,W
+0468:  MOVWF  05
+0469:  MOVF   00,W
+046A:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+046B:  BTFSS  2A.7
+046C:  GOTO   475
+....................      
+....................       output_high(pin_c1); 
+046D:  MOVLB  02
+046E:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+046F:  GOTO   470
+0470:  GOTO   471
+0471:  GOTO   472
+....................       output_low(pin_c1); 
+0472:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0473:  GOTO   47A
+0474:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+0475:  MOVLB  02
+0476:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+0477:  GOTO   478
+....................       output_low(pin_c1); 
+0478:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+0479:  GOTO   47A
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+047A:  MOVLB  06
+047B:  BTFSS  2A.6
+047C:  GOTO   485
+....................      
+....................       output_high(pin_c1); 
+047D:  MOVLB  02
+047E:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+047F:  GOTO   480
+0480:  GOTO   481
+0481:  GOTO   482
+....................       output_low(pin_c1); 
+0482:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0483:  GOTO   48A
+0484:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+0485:  MOVLB  02
+0486:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+0487:  GOTO   488
+....................       output_low(pin_c1); 
+0488:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+0489:  GOTO   48A
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+048A:  MOVLB  06
+048B:  BTFSS  2A.5
+048C:  GOTO   495
+....................      
+....................       output_high(pin_c1); 
+048D:  MOVLB  02
+048E:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+048F:  GOTO   490
+0490:  GOTO   491
+0491:  GOTO   492
+....................       output_low(pin_c1); 
+0492:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+0493:  GOTO   49A
+0494:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+0495:  MOVLB  02
+0496:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+0497:  GOTO   498
+....................       output_low(pin_c1); 
+0498:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+0499:  GOTO   49A
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+049A:  MOVLB  06
+049B:  BTFSS  2A.4
+049C:  GOTO   4A5
+....................      
+....................       output_high(pin_c1); 
+049D:  MOVLB  02
+049E:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+049F:  GOTO   4A0
+04A0:  GOTO   4A1
+04A1:  GOTO   4A2
+....................       output_low(pin_c1); 
+04A2:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+04A3:  GOTO   4AA
+04A4:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+04A5:  MOVLB  02
+04A6:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+04A7:  GOTO   4A8
+....................       output_low(pin_c1); 
+04A8:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+04A9:  GOTO   4AA
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+04AA:  MOVLB  06
+04AB:  BTFSS  2A.3
+04AC:  GOTO   4B5
+....................      
+....................       output_high(pin_c1); 
+04AD:  MOVLB  02
+04AE:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+04AF:  GOTO   4B0
+04B0:  GOTO   4B1
+04B1:  GOTO   4B2
+....................       output_low(pin_c1); 
+04B2:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+04B3:  GOTO   4BA
+04B4:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+04B5:  MOVLB  02
+04B6:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+04B7:  GOTO   4B8
+....................       output_low(pin_c1); 
+04B8:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+04B9:  GOTO   4BA
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+04BA:  MOVLB  06
+04BB:  BTFSS  2A.2
+04BC:  GOTO   4C5
+....................      
+....................       output_high(pin_c1); 
+04BD:  MOVLB  02
+04BE:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+04BF:  GOTO   4C0
+04C0:  GOTO   4C1
+04C1:  GOTO   4C2
+....................       output_low(pin_c1); 
+04C2:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+04C3:  GOTO   4CA
+04C4:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+04C5:  MOVLB  02
+04C6:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+04C7:  GOTO   4C8
+....................       output_low(pin_c1); 
+04C8:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+04C9:  GOTO   4CA
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+04CA:  MOVLB  06
+04CB:  BTFSS  2A.1
+04CC:  GOTO   4D5
+....................      
+....................       output_high(pin_c1); 
+04CD:  MOVLB  02
+04CE:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+04CF:  GOTO   4D0
+04D0:  GOTO   4D1
+04D1:  GOTO   4D2
+....................       output_low(pin_c1); 
+04D2:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+04D3:  GOTO   4DA
+04D4:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+04D5:  MOVLB  02
+04D6:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+04D7:  GOTO   4D8
+....................       output_low(pin_c1); 
+04D8:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+04D9:  GOTO   4DA
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+04DA:  MOVLB  06
+04DB:  BTFSS  2A.0
+04DC:  GOTO   4E5
+....................      
+....................       output_high(pin_c1); 
+04DD:  MOVLB  02
+04DE:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_1); 
+04DF:  GOTO   4E0
+04E0:  GOTO   4E1
+04E1:  GOTO   4E2
+....................       output_low(pin_c1); 
+04E2:  BCF    0E.1
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+04E3:  GOTO   4EA
+04E4:  MOVLB  06
+....................      
+....................       output_high(pin_c1); 
+04E5:  MOVLB  02
+04E6:  BSF    0E.1
+....................       delay_cycles(DELAY_HIGH_0); 
+04E7:  GOTO   4E8
+....................       output_low(pin_c1); 
+04E8:  BCF    0E.1
+....................       delay_cycles(DELAY_LOW_0); 
+04E9:  GOTO   4EA
+....................     }              
+04EA:  MOVLB  06
+04EB:  INCF   28,F
+04EC:  BTFSC  03.2
+04ED:  INCF   29,F
+04EE:  GOTO   45C
+....................   } 
+.................... } 
+....................  
+.................... #inline 
+.................... void ChangeLED7() { 
+....................  
+....................   for (unsigned int16 p=0; p < _bufferSize; p++) { 
+*
+04F0:  MOVLB  06
+04F1:  CLRF   29
+04F2:  CLRF   28
+04F3:  MOVF   29,F
+04F4:  BTFSS  03.2
+04F5:  GOTO   586
+04F6:  MOVF   71,W
+04F7:  SUBWF  28,W
+04F8:  BTFSC  03.0
+04F9:  GOTO   586
+....................    
+....................     char dataByte = _buffer[p]; 
+04FA:  MOVLW  05
+04FB:  ADDWF  28,W
+04FC:  MOVWF  04
+04FD:  MOVLW  20
+04FE:  ADDWFC 29,W
+04FF:  MOVWF  05
+0500:  MOVF   00,W
+0501:  MOVWF  2A
+....................      
+....................     if (bit_test(dataByte, 7)) { 
+0502:  BTFSS  2A.7
+0503:  GOTO   50C
+....................      
+....................       output_high(pin_c2); 
+0504:  MOVLB  02
+0505:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0506:  GOTO   507
+0507:  GOTO   508
+0508:  GOTO   509
+....................       output_low(pin_c2); 
+0509:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+050A:  GOTO   511
+050B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+050C:  MOVLB  02
+050D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+050E:  GOTO   50F
+....................       output_low(pin_c2); 
+050F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0510:  GOTO   511
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 6)) { 
+0511:  MOVLB  06
+0512:  BTFSS  2A.6
+0513:  GOTO   51C
+....................      
+....................       output_high(pin_c2); 
+0514:  MOVLB  02
+0515:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0516:  GOTO   517
+0517:  GOTO   518
+0518:  GOTO   519
+....................       output_low(pin_c2); 
+0519:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+051A:  GOTO   521
+051B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+051C:  MOVLB  02
+051D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+051E:  GOTO   51F
+....................       output_low(pin_c2); 
+051F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0520:  GOTO   521
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 5)) { 
+0521:  MOVLB  06
+0522:  BTFSS  2A.5
+0523:  GOTO   52C
+....................      
+....................       output_high(pin_c2); 
+0524:  MOVLB  02
+0525:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0526:  GOTO   527
+0527:  GOTO   528
+0528:  GOTO   529
+....................       output_low(pin_c2); 
+0529:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+052A:  GOTO   531
+052B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+052C:  MOVLB  02
+052D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+052E:  GOTO   52F
+....................       output_low(pin_c2); 
+052F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0530:  GOTO   531
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 4)) { 
+0531:  MOVLB  06
+0532:  BTFSS  2A.4
+0533:  GOTO   53C
+....................      
+....................       output_high(pin_c2); 
+0534:  MOVLB  02
+0535:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0536:  GOTO   537
+0537:  GOTO   538
+0538:  GOTO   539
+....................       output_low(pin_c2); 
+0539:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+053A:  GOTO   541
+053B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+053C:  MOVLB  02
+053D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+053E:  GOTO   53F
+....................       output_low(pin_c2); 
+053F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0540:  GOTO   541
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 3)) { 
+0541:  MOVLB  06
+0542:  BTFSS  2A.3
+0543:  GOTO   54C
+....................      
+....................       output_high(pin_c2); 
+0544:  MOVLB  02
+0545:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0546:  GOTO   547
+0547:  GOTO   548
+0548:  GOTO   549
+....................       output_low(pin_c2); 
+0549:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+054A:  GOTO   551
+054B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+054C:  MOVLB  02
+054D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+054E:  GOTO   54F
+....................       output_low(pin_c2); 
+054F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0550:  GOTO   551
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 2)) { 
+0551:  MOVLB  06
+0552:  BTFSS  2A.2
+0553:  GOTO   55C
+....................      
+....................       output_high(pin_c2); 
+0554:  MOVLB  02
+0555:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0556:  GOTO   557
+0557:  GOTO   558
+0558:  GOTO   559
+....................       output_low(pin_c2); 
+0559:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+055A:  GOTO   561
+055B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+055C:  MOVLB  02
+055D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+055E:  GOTO   55F
+....................       output_low(pin_c2); 
+055F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0560:  GOTO   561
+....................     }              
+....................      
+....................     if (bit_test(dataByte, 1)) { 
+0561:  MOVLB  06
+0562:  BTFSS  2A.1
+0563:  GOTO   56C
+....................      
+....................       output_high(pin_c2); 
+0564:  MOVLB  02
+0565:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0566:  GOTO   567
+0567:  GOTO   568
+0568:  GOTO   569
+....................       output_low(pin_c2); 
+0569:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+056A:  GOTO   571
+056B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+056C:  MOVLB  02
+056D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+056E:  GOTO   56F
+....................       output_low(pin_c2); 
+056F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0570:  GOTO   571
+....................     }              
+....................  
+....................     if (bit_test(dataByte, 0)) { 
+0571:  MOVLB  06
+0572:  BTFSS  2A.0
+0573:  GOTO   57C
+....................      
+....................       output_high(pin_c2); 
+0574:  MOVLB  02
+0575:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_1); 
+0576:  GOTO   577
+0577:  GOTO   578
+0578:  GOTO   579
+....................       output_low(pin_c2); 
+0579:  BCF    0E.2
+.................... //        delay_cycles(DELAY_LOW_1); 
+....................     } else { 
+057A:  GOTO   581
+057B:  MOVLB  06
+....................      
+....................       output_high(pin_c2); 
+057C:  MOVLB  02
+057D:  BSF    0E.2
+....................       delay_cycles(DELAY_HIGH_0); 
+057E:  GOTO   57F
+....................       output_low(pin_c2); 
+057F:  BCF    0E.2
+....................       delay_cycles(DELAY_LOW_0); 
+0580:  GOTO   581
+....................     }              
+0581:  MOVLB  06
+0582:  INCF   28,F
+0583:  BTFSC  03.2
+0584:  INCF   29,F
+0585:  GOTO   4F3
+....................   } 
+.................... } 
+....................  
+.................... void main() { 
+*
+006A:  MOVLW  55
+006B:  MOVLB  1C
+006C:  MOVWF  0F
+006D:  MOVLW  AA
+006E:  MOVWF  0F
+006F:  BCF    0F.0
+0070:  MOVLW  15
+0071:  MOVWF  24
+0072:  MOVLW  14
+0073:  MOVLB  1D
+0074:  MOVWF  20
+0075:  MOVLW  55
+0076:  MOVLB  1C
+0077:  MOVWF  0F
+0078:  MOVLW  AA
+0079:  MOVWF  0F
+007A:  BSF    0F.0
+007B:  MOVLW  F0
+007C:  MOVLB  01
+007D:  MOVWF  19
+007E:  MOVLB  00
+007F:  CLRF   24
+0080:  MOVLB  03
+0081:  BSF    1F.3
+0082:  MOVLW  8A
+0083:  MOVWF  1B
+0084:  MOVLW  00
+0085:  MOVWF  1C
+0086:  MOVLW  A6
+0087:  MOVWF  1E
+0088:  MOVLW  90
+0089:  MOVWF  1D
+008A:  CLRF   0C
+008B:  CLRF   0E
+008C:  MOVLB  00
+008D:  CLRF   1F
+....................  
+....................   enable_interrupts(INT_RDA); 
+008E:  MOVLB  01
+008F:  BSF    11.5
+....................   enable_interrupts(GLOBAL); 
+0090:  MOVLW  C0
+0091:  IORWF  0B,F
+....................  
+....................   // initialize the i/o for the led communications 
+....................   output_drive(pin_a5); 
+0092:  BCF    0C.5
+....................   output_drive(pin_a4); 
+0093:  BCF    0C.4
+....................   output_drive(pin_c4); 
+0094:  BCF    0E.4
+....................   output_drive(pin_c3); 
+0095:  BCF    0E.3
+....................   output_drive(pin_a2); 
+0096:  BCF    0C.2
+....................   output_drive(pin_c0); 
+0097:  BCF    0E.0
+....................   output_drive(pin_c1); 
+0098:  BCF    0E.1
+....................   output_drive(pin_c2); 
+0099:  BCF    0E.2
+....................    
+....................   // 0 means waiting for the port on next receive byte 
+....................   _inputState = 0; 
+009A:  CLRF   74
+....................    
+....................   // reset to the beginning of the buffer for populating 
+....................   _inputPosition = 0; 
+009B:  CLRF   75
+....................  
+....................   // do not send when we begin 
+....................   _startSending = false; 
+009C:  BCF    76.0
+....................  
+....................   while (true) { 
+....................  
+....................     while (!_startSending); 
+009D:  BTFSS  76.0
+009E:  GOTO   09D
+....................  
+....................     // 0 means waiting for the port 
+....................     _inputState = 0; 
+009F:  CLRF   74
+....................      
+....................     // 0 is the first position of the buffer 
+....................     _inputPosition = 0; 
+00A0:  CLRF   75
+....................  
+....................     // reset the send status to not send 
+....................     _startSending = false; 
+00A1:  BCF    76.0
+....................  
+....................     // copy the data from the receive buffer to the transmit buffer 
+....................     for (char tr = 0; tr < _bufferSizeRecv; tr++) 
+00A2:  MOVLB  06
+00A3:  CLRF   25
+00A4:  MOVF   73,W
+00A5:  SUBWF  25,W
+00A6:  BTFSC  03.0
+00A7:  GOTO   0C4
+....................       _buffer[tr] = _bufferRecv[tr]; 
+00A8:  MOVLW  05
+00A9:  ADDWF  25,W
+00AA:  MOVWF  78
+00AB:  MOVLW  20
+00AC:  MOVWF  7A
+00AD:  BTFSC  03.0
+00AE:  INCF   7A,F
+00AF:  MOVF   78,W
+00B0:  MOVWF  28
+00B1:  MOVF   7A,W
+00B2:  MOVWF  29
+00B3:  MOVLW  F5
+00B4:  ADDWF  25,W
+00B5:  MOVWF  04
+00B6:  MOVLW  20
+00B7:  MOVWF  05
+00B8:  BTFSC  03.0
+00B9:  INCF   05,F
+00BA:  MOVF   00,W
+00BB:  MOVWF  2A
+00BC:  MOVF   29,W
+00BD:  MOVWF  05
+00BE:  MOVF   28,W
+00BF:  MOVWF  04
+00C0:  MOVF   2A,W
+00C1:  MOVWF  00
+00C2:  INCF   25,F
+00C3:  GOTO   0A4
+....................  
+....................     _bufferSize = _bufferSizeRecv; 
+00C4:  MOVF   73,W
+00C5:  MOVWF  71
+....................     _outputPort = _outputPortRecv; 
+00C6:  MOVF   72,W
+00C7:  MOVWF  70
+....................   
+....................     switch (_outputPort) { 
+00C8:  MOVF   70,W
+00C9:  ADDLW  F8
+00CA:  BTFSC  03.0
+00CB:  GOTO   588
+00CC:  ADDLW  08
+00CD:  MOVLB  00
+00CE:  GOTO   58B
+....................      
+....................       case 0: 
+....................         ChangeLED0(); 
+....................         break; 
+*
+0165:  GOTO   588
+....................       case 1: 
+....................         ChangeLED1(); 
+....................         break; 
+*
+01FC:  GOTO   588
+....................       case 2: 
+....................         ChangeLED2(); 
+....................         break; 
+*
+0293:  GOTO   588
+....................       case 3: 
+....................         ChangeLED3(); 
+....................         break; 
+*
+032A:  GOTO   588
+....................       case 4: 
+....................         ChangeLED4(); 
+....................         break; 
+*
+03C1:  GOTO   588
+....................       case 5: 
+....................         ChangeLED5(); 
+....................         break; 
+*
+0458:  GOTO   588
+....................       case 6: 
+....................         ChangeLED6(); 
+....................         break; 
+*
+04EF:  GOTO   588
+....................       case 7: 
+....................         ChangeLED7(); 
+....................         break; 
+*
+0586:  GOTO   588
+0587:  MOVLB  06
+....................     }         
+0588:  MOVLB  01
+0589:  GOTO   09D
+....................   } 
+.................... } 
+058A:  SLEEP
+
+Configuration Fuses:
+   Word  1: 3944   INTRC_IO NOWDT PUT MCLR PROTECT NOBROWNOUT NOCLKOUT IESO FCMEN
+   Word  2: 1EFF   NOWRT PPS1WAY ZCDDIS NOPLLEN STVREN BORV19 NOLPBOR NODEBUG NOLVP

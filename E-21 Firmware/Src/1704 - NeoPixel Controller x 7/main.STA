@@ -1,0 +1,59 @@
+
+ROM used:   1430/4096 (35%)
+            1430/4096 (35%) including unused fragments
+
+            0.7 Average locations per line
+            2.0 Average locations per statement
+
+RAM used:   500/512 (98%) at main() level
+            512/512 (100%) worst case
+
+Stack used: 2 worst case (0 in main + 2 for interrupts)
+Stack size: 16
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+ 1097   710 100  main.c
+   24     0   0  main.h
+ 1024     0   0  ..\..\..\..\..\Program Files (x86)\PICC\Devices\16F1704.h
+----- -----
+ 2145   710 Total
+
+Page ROM  %  RAM    Vol Diff  Functions:
+---- --- --- ---    --- ----  ----------
+0     17   1    0             @GETCH_BIU_1
+0     56   4    4    369  6.5  RDA_isr
+ Inline         0   2402  5.4  ChangeLED0
+ Inline         0   2402  5.4  ChangeLED1
+ Inline         0   2402  5.4  ChangeLED2
+ Inline         0   2402  5.4  ChangeLED3
+ Inline         0   2402  5.4  ChangeLED4
+ Inline         0   2402  5.4  ChangeLED5
+ Inline         0   2402  5.4  ChangeLED6
+ Inline         0   2402  5.4  ChangeLED7
+0   1313  92    3   1090  6.8  MAIN
+0     12   1    0             @goto11488
+ Inline         0             @cinit1
+
+Program metrics:
+    Functions               10
+    Statements              710
+    Comments                272
+    Volume (V)              29953
+    Difficulty (D)          57.0
+    Effort to implement (E) 1706316
+    Time to implement (T)   26 hours, 20 minutes
+    Est Delivered Bugs (B)  5
+    Cyclomatic Complexity   85
+    Maintainability (MI)    107
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00002     3  0  
+00003-00003     0  1  
+00004-00020    29  0  
+00021-007FF  1398  617  
+00800-00FFF     0  2048  
+
+
+
