@@ -14,7 +14,7 @@ The Neopixel blaster connects WS2812 Addressable RGB LEDs to EZ-Builder. EZ-buil
 
 **Documentation:** Schematic PDF, Datasheet PDF, BOM
 
-**Hardware:** Altium PCB design File, Altium SCH Design File
+**Hardware:** Altium PCB design File, Altium SCH Design File, Gerbers
 
 **Firmware:** Code, Compiled Hex
 
