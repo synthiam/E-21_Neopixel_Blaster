@@ -4,9 +4,9 @@
 ![Neopixel Blaster](https://live.staticflickr.com/65535/32801181517_8283eb2b66_k.jpg)
 ![Neopixel Blaster](https://live.staticflickr.com/65535/33867577528_87d887444d_k.jpg)
 
-This requires either a NeoPixel or the Blaster Bit from here: https://github.com/synthiam/E-22_Blaster_Bit
+This reference design pairs with either a WS2812B NeoPixel LED or a Blaster Bit from here: https://github.com/synthiam/E-22_Blaster_Bit
 
-The EZ-Builder behavior control for this reference design is here: https://synthiam.com/Software/Manual/Neopixel-Blaster-16172
+The EZ-Builder behavior control for this design is here: https://synthiam.com/Software/Manual/Neopixel-Blaster-16172
 
 The Neopixel blaster connects WS2812 Addressable RGB LEDs to EZ-Builder. EZ-builder can create animations and display all kinds of colors with the WS2812B LEDs thanks to the Neopixel Blaster! Connect 8 Blaster bits or entire WS2812 strips to the Neopixel Blaster for a colorful light show.
 
