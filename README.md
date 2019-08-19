@@ -3,7 +3,7 @@
 ![Neopixel Blaster](https://live.staticflickr.com/65535/33867577428_49946a17c2_k.jpg)
 ![Neopixel Blaster](https://live.staticflickr.com/65535/32801181517_8283eb2b66_k.jpg)
 ![Neopixel Blaster](https://live.staticflickr.com/65535/33867577528_87d887444d_k.jpg)
-[![Neopixel Blaster](https://drive.google.com/file/d/1p9rkV6PgvVRg59BiLK9SOzjXMJtoiBE9/view?usp=sharing)](https://www.youtube.com/watch?v=iWZ4e5sMYgQ&t=141s)
+[![Neopixel Blaster](https://live.staticflickr.com/65535/48579052722_8eb36a6f7d_h.jpg)](https://www.youtube.com/watch?v=iWZ4e5sMYgQ&t=141s)
 
 This reference design pairs with either a WS2812B NeoPixel LED or a Blaster Bit from here: https://github.com/synthiam/E-22_Blaster_Bit
 
