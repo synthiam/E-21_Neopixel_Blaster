@@ -11,7 +11,7 @@ The Neopixel blaster connects WS2812 Addressable RGB LEDs to EZ-Builder. EZ-buil
 
 A unique feature of this board is that it allows any EZ-Builder compatible board to use Neopixel LEDs, no libraries or precision timing required, the Neopixel Blaster takes care of it.
 
-The EZ-Builder behavior control for this design is here: https://synthiam.com/Software/Manual/Neopixel-Blaster-16172
+The simple to use EZ-Builder behavior control for this reference design can be found here: https://synthiam.com/Software/Manual/Neopixel-Blaster-16172
 
 ## Contents
 
