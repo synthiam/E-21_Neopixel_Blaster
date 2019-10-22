@@ -42,6 +42,8 @@ We didn't stop at the software, we also made time saving hardware solutions. Thi
 
 [**Firmware:**](https://github.com/synthiam/E-21_Neopixel_Blaster/tree/master/E-21%20Firmware) Code, Compiled Hex
 
+*Altium Libraries are also available <a href="https://github.com/synthiam/Synthiam_Altium_Librairies">here</a>*
+
 ## Photos
 
 <p align="left">
