@@ -13,6 +13,7 @@ We didn't stop at the software, we also made time saving hardware solutions. Thi
 **Features:** 
 - 8 channels 
 - Control up to 80 LEDs per channel
+- Each LED can display 1 of 16 million different colors
 - Mini programming header
 - 5V tolerant I/O pins
 - RGB LED status indicator
