@@ -21,6 +21,7 @@ We didn't stop at the software, we also made time saving hardware solutions. Thi
 - Voltage requirement: 6-18VDC (7.4V Typical)
 - Current draw: WS2812B off - 7mA, WS2812B white - 46mA
 - Dimensions: 29.7(W) x 35.7(L) x 11.5(H) (mm)
+- Weight: 5g
 
 **Major components:** 
 - PIC16F1704-I/ST 8-bit PIC microcontroller (custom firmware provided)
