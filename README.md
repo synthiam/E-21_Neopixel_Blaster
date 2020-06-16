@@ -6,9 +6,9 @@ If you are new to GitHub and would like to create a derivative of this project, 
 
 ## Description
 
-Out of our passion to solve the issue of time waste in the robot creation process, EZ-Builder was born. The EZ-Builder software platform reduces the time it takes to get from idea to implementation. Since 2011 we have been listening to the challenges robot builders encounter and continue to provide them with an ever expanding toolbox of solutions. Join us on this journey!
+Out of our passion to solve the issue of time waste in the robot creation process, ARC was born. The ARC software platform reduces the time it takes to get from idea to implementation. Since 2011 we have been listening to the challenges robot builders encounter and continue to provide them with an ever expanding toolbox of solutions. Join us on this journey!
 
-We didn't stop at the software, we also made time saving hardware solutions. This Neopixel Blaster reference design is one of them. The Neopixel blaster connects WS2812 Addressable RGB LEDs to EZ-Builder. By utilizing EZ-builder the Neopixel Blaster can create animations and display all kinds of colors with WS2812B LEDs. A unique feature of this board is that it allows any EZ-Builder compatible board to use Neopixel LEDs, no libraries or precision timing required. We want to share these files with you so you can create your own version for your community and customers to enjoy!
+We didn't stop at the software, we also made time saving hardware solutions. This Neopixel Blaster reference design is one of them. The Neopixel blaster connects WS2812 Addressable RGB LEDs to ARC. By utilizing ARC, the Neopixel Blaster can create animations and display all kinds of colors with WS2812B LEDs. A unique feature of this board is that it allows any EZ-Builder compatible board to use Neopixel LEDs, no libraries or precision timing required. We want to share these files with you so you can create your own version for your community and customers to enjoy!
 
 **Features:** 
 - 8 channels 
@@ -17,7 +17,7 @@ We didn't stop at the software, we also made time saving hardware solutions. Thi
 - Mini programming header
 - 5V tolerant I/O pins
 - RGB LED status indicator
-- EZ-Builder behavior control available
+- ARC skill available
 - Voltage requirement: 6-18VDC (7.4V Typical)
 - Current draw: WS2812B off - 7mA, WS2812B white - 46mA
 - Dimensions: 29.7(W) x 35.7(L) x 11.5(H) (mm)
@@ -68,9 +68,9 @@ Link: https://youtu.be/iWZ4e5sMYgQ
 
 <a href="https://youtu.be/iWZ4e5sMYgQ"><img src="https://media.giphy.com/media/iJVrOCN7n2OYXmgoqS/giphy.gif" width="683" height="383"></a>
 
-## EZ-Builder Behavior Control
+## ARC Skill
 
-The EZ-Builder Neopixel Blaster Control makes it easy to control the Neopixel LEDs. The LED colors can be chained and activated with a simple code segment. 
+The ARC Neopixel Blaster skill makes it easy to control the Neopixel LEDs. The LED colors can be chained and activated with a simple code segment. 
 
 Link: https://synthiam.com/Software/Manual/Neopixel-Blaster-16172
 
